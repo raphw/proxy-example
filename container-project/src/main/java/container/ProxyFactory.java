@@ -14,22 +14,20 @@ public class ProxyFactory {
         if (!instance.getClass().isAnnotationPresent(Bean.class)) {
             throw new IllegalArgumentException();
         }
-
-        BuildTimeProxy annotation = instance.getClass().getAnnotation(BuildTimeProxy.class);
-        Class<?> proxy;
-        if (annotation == null) {
-            System.out.println("Generate runtime proxy");
-            proxy = make(TypeDescription.ForLoadedType.of(instance.getClass()))
-                    .load(instance.getClass().getClassLoader())
-                    .getLoaded();
-        } else {
+        if (instance instanceof BuildTimeProxy) {
             System.out.println("Use build-time proxy");
-            proxy = annotation.type();
-        }
-        try {
-            return (T) proxy.getConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            return (T) ((BuildTimeProxy) instance).proxy();
+        } else {
+            try {
+                System.out.println("Generate runtime proxy");
+                return (T) make(TypeDescription.ForLoadedType.of(instance.getClass()))
+                        .load(instance.getClass().getClassLoader())
+                        .getLoaded()
+                        .getConstructor()
+                        .newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

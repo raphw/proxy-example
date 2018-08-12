@@ -1,10 +1,6 @@
 package container;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+public interface BuildTimeProxy {
 
-@Retention(RetentionPolicy.RUNTIME)
-public @interface BuildTimeProxy {
-
-    Class<?> type();
+    Object proxy();
 }
